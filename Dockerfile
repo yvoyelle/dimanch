@@ -1,55 +1,27 @@
-From maven:3.8.3-openjdk-17 as build
-RUN mvn install -DskipTests=true
+# Use an official Maven image to build the project
+FROM maven:3.8.4-openjdk-17 AS build
 
-
-run mvn clean package 
-from openjdk:17-jdk-slim
-COPY --from=build /app/target/dimanch.jar /app/dimanch.jar
-COPY --from=build /build/libs/dimanch.jar app/dimanch.jar
-
-EXPOSE 8080
-RUN wget https://archive.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz && \
-    tar -xzvf apache-maven-$MAVEN_VERSION-bin.tar.gz -C /opt && \
-    ln -s /opt/apache-maven-$MAVEN_VERSION /opt/maven && \
-    ln -s /opt/maven/bin/mvn /usr/bin/mvn && \
-    rm apache-maven-$MAVEN_VERSION-bin.tar.gz
-
-# Set environment variables for Maven
-ENV MAVEN_HOME=/opt/maven
-ENV PATH=$MAVEN_HOME/bin:$PATH
-
-# Set the working directory
+# Set the working directory in the container
 WORKDIR /app
-ENTRYPOINT ["java", "-jar", "target/dimanch.jar"]
 
+# Copy the pom.xml file and the source code
+COPY pom.xml .
+COPY src ./src
 
+# Package the application (skip tests if necessary)
+RUN mvn package -DskipTests
 
-#ENTRYPOINT ["java","-jar","voyelle-software-1.jar"]
-#ENTRYPOINT ["java","-jar","app.jar"]
-#ENTRYPOINT ["java", "-Dspring.profiles.active=prod", "-jar", "/app/voyelle-software-1.jar"]
+# Use an official OpenJDK runtime as a parent image
+FROM openjdk:17-jdk-slim
 
+# Set the working directory in the container
+WORKDIR /app
 
-# Use an official Maven image to build the application
-#From maven:3.2.5-openjdk-17 as build
+# Copy the jar file from the build stage
+COPY --from=build /app/target/your-app-name.jar /app/your-app-name.jar
 
+# Specify the command to run the application
+CMD ["java", "-jar", "dimanch.jar"]
 
-#FROM ubuntu:latest AS build
-
-#RUN apt-get update
-##RUN apt-get install openjdk-17-jdk -y
-#COPY . .
-
-#RUN apt-get update && \
-    #apt-get install dos2unix && \
-   # apt-get clean
-#RUN dos2unix gradlew
-#RUN chmod +x gradlew
-#RUN ./gradlew lib:build
-
-#FROM openjdk:22-jdk-slim
-
-#EXPOSE 8080
-
-#COPY --from=build /build/libs/voyelle-software-1.jar app.jar
-
-#ENTRYPOINT ["java", "-jar", "app.jar"]
+# Expose the port the application runs on
+EXPOSE 8080
