@@ -1,4 +1,4 @@
-FROM maven:3.2.5-openjdk-17 AS build
+FROM maven:3.8.4-openjdk-17 AS build
 VOLUME /tmp
 WORKDIR /app
 
