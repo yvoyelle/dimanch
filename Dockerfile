@@ -11,11 +11,11 @@ RUN mvn package -DskipTests
 FROM openjdk:17-jdk-slim
 
 # Set the working directory in the container
-WORKDIR /dimanch
+WORKDIR /app
 
 
 # Copy the jar file from the build stage
-COPY --from=build /dimanch/target/demo.jar /dimanch/demo.jar
+COPY --from=build /app/target/demo.jar /app/demo.jar
 
 # Specify the command to run the application
 CMD ["java", "-jar", "demo.jar"]
