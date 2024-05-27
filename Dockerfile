@@ -1,31 +1,25 @@
-FROM maven:3.8.4-openjdk-17 AS build
-VOLUME /tmp
+#See https://aka.ms/containerfastmode to understand how Visua...
+
+FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim AS base
 WORKDIR /app
+EXPOSE 80
+EXPOSE 443
 
-# Copy the pom.xml file and the source code
-COPY pom.xml .
-COPY src ./src
+FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
+WORKDIR /src
+COPY ["demo/demo.csproj", "demo/"]
+RUN dotnet restore "client/client.csproj"
+COPY . .
+WORKDIR "/src/demo"
+RUN dotnet build "demo.csproj" -c Release -o /app/build
 
-# Package the application (skip tests if necessary)
-RUN mvn package -DskipTests
-FROM openjdk:17-jdk-slim
+FROM build AS publish
+RUN dotnet publish "demo.csproj" -c Release -o /app/publish
 
-# Set the working directory in the container
-WORKDIR /dimanch
-
-
-# Copy the jar file from the build stage
-COPY --from=build /dimanch/target/demo.jar /dimanch/demo.jar
-
-# Specify the command to run the application
-CMD ["java", "-jar", "demo.jar"]
-
-# Expose the port the application runs on
-EXPOSE 8080
-
-
-
-
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet', "demo.dll"]
 
 
 
