@@ -8,7 +8,7 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
 WORKDIR /src
-
+COPY --from=build /dimanch/target/demo.jar /dimanch/demo.jar
 RUN dotnet restore "demo/demo.csproj"
 COPY . .
 WORKDIR "/src/demo"
