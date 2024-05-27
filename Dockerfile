@@ -5,15 +5,13 @@ WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
-FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
+FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
-COPY ["yvoyelle/demo.csproj", "dimanch/"]
-RUN dotnet restore "client/client.csproj"
+COPY ["demo.csproj", "./"]
+RUN dotnet restore "demo.csproj"
 COPY . .
-WORKDIR "/src/demo"
+WORKDIR "/src/."
 RUN dotnet build "demo.csproj" -c Release -o /app/build
-
-
 
 
 
